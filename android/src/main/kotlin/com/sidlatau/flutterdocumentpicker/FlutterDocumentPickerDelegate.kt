@@ -6,8 +6,10 @@ import android.content.AsyncTaskLoader
 import android.content.Context
 import android.content.Intent
 import android.content.Loader
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.util.Log
 import io.flutter.plugin.common.MethodChannel
@@ -15,7 +17,11 @@ import io.flutter.plugin.common.PluginRegistry
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.IOException
+import java.util.Arrays
 
 private const val REQUEST_CODE_PICK_FILE = 603
 private const val EXTRA_URI = "EXTRA_URI"
@@ -190,7 +196,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
             file.delete()
         }
 
-        BufferedInputStream(context.contentResolver.openInputStream(uri)).use { inputStream ->
+        BufferedInputStream(getInputStream(uri)).use { inputStream ->
             BufferedOutputStream(FileOutputStream(file)).use { outputStream ->
                 val buf = ByteArray(1024)
                 var len = inputStream.read(buf)
@@ -202,6 +208,54 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
         }
 
         return file.absolutePath
+    }
+    
+    private fun isVirtualFile(uri: Uri): Boolean {
+        if (!DocumentsContract.isDocumentUri(this, uri)) {
+            return false
+        }
+
+        val cursor: Cursor? = context.contentResolver.query(
+                uri,
+                arrayOf(DocumentsContract.Document.COLUMN_FLAGS),
+                null,
+                null,
+                null
+        )
+
+        val flags: Int = cursor?.use {
+            if (cursor.moveToFirst()) {
+                cursor.getInt(0)
+            } else {
+                0
+            }
+        } ?: 0
+
+        return flags and DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT != 0
+    }
+    
+    @Throws(IOException::class)
+    private fun getInputStreamForVirtualFile(
+        uri: Uri, mimeTypeFilter: String): InputStream {
+
+        val openableMimeTypes: Array<String>? =
+                context.contentResolver.getStreamTypes(uri, mimeTypeFilter)
+
+        return if (openableMimeTypes?.isNotEmpty() == true) {
+            context.contentResolver
+                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)
+                    .createInputStream()
+        } else {
+            throw FileNotFoundException()
+        }
+    }
+    
+    private fun getInputStream(uri: Uri): InputStream {
+        if (isVirtualFile(uri)) {
+            return getInputStreamForVirtualFile(uri, "application/pdf")
+        }
+        
+        return context.contentResolver.openInputStream(uri)
     }
 }
 
