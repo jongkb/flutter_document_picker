@@ -243,8 +243,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
 
         return if (openableMimeTypes?.isNotEmpty() == true) {
             context.contentResolver
-                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)!!
-                    .createInputStream()
+                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)?.createInputStream()
         } else {
             throw FileNotFoundException()
         }
@@ -252,7 +251,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     
     private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
-            return getInputStreamForVirtualFile(uri, "application/pdf")
+            return getInputStreamForVirtualFile(uri, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         }
         
         return context.contentResolver.openInputStream(uri)
