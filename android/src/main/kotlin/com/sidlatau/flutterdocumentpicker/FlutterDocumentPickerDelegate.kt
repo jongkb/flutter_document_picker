@@ -254,7 +254,8 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     
     private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
-            return getInputStreamForVirtualFile(uri, "text/plain")
+            Log.d(FlutterDocumentPickerPlugin.TAG, "Is virtual file")
+            return getInputStreamForVirtualFile(uri, "*/*")
         }
         
         return context.contentResolver.openInputStream(uri)
