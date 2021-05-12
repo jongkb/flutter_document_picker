@@ -196,7 +196,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
             file.delete()
         }
 
-        BufferedInputStream(getInputStream(uri)).use { inputStream ->
+        BufferedInputStream(getInputStream(uri))?.use { inputStream ->
             BufferedOutputStream(FileOutputStream(file)).use { outputStream ->
                 val buf = ByteArray(1024)
                 var len = inputStream.read(buf)
@@ -211,7 +211,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     }
     
     private fun isVirtualFile(uri: Uri): Boolean {
-        if (!DocumentsContract.isDocumentUri(this, uri)) {
+        if (!DocumentsContract.isDocumentUri(context, uri)) {
             return false
         }
 
@@ -236,21 +236,21 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     
     @Throws(IOException::class)
     private fun getInputStreamForVirtualFile(
-        uri: Uri, mimeTypeFilter: String): InputStream {
+        uri: Uri, mimeTypeFilter: String): InputStream? {
 
         val openableMimeTypes: Array<String>? =
                 context.contentResolver.getStreamTypes(uri, mimeTypeFilter)
 
         return if (openableMimeTypes?.isNotEmpty() == true) {
             context.contentResolver
-                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)
+                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)?
                     .createInputStream()
         } else {
             throw FileNotFoundException()
         }
     }
     
-    private fun getInputStream(uri: Uri): InputStream {
+    private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
             return getInputStreamForVirtualFile(uri, "application/pdf")
         }
