@@ -21,7 +21,6 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.IOException
-import java.util.Arrays
 
 private const val REQUEST_CODE_PICK_FILE = 603
 private const val EXTRA_URI = "EXTRA_URI"
@@ -242,6 +241,10 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
                 context.contentResolver.getStreamTypes(uri, mimeTypeFilter)
 
         return if (openableMimeTypes?.isNotEmpty() == true) {
+            for (mimeType in openableMimeTypes) {
+                Log.d(FlutterDocumentPickerPlugin.TAG, mimeType)
+            }
+            
             context.contentResolver
                     .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)?.createInputStream()
         } else {
@@ -251,7 +254,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     
     private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
-            return getInputStreamForVirtualFile(uri, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            return getInputStreamForVirtualFile(uri, "application/*")
         }
         
         return context.contentResolver.openInputStream(uri)
