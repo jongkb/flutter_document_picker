@@ -39,7 +39,7 @@ class FlutterDocumentPickerDelegate(
         this.invalidFileNameSymbols = invalidFileNameSymbols
 
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        // intent.addCategory(Intent.CATEGORY_OPENABLE)
         if (allowedMimeTypes != null) {
             if (allowedMimeTypes.size == 1) {
                 intent.type = allowedMimeTypes.first()
