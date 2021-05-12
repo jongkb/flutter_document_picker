@@ -243,7 +243,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
 
         return if (openableMimeTypes?.isNotEmpty() == true) {
             context.contentResolver
-                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)?
+                    .openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)!!
                     .createInputStream()
         } else {
             throw FileNotFoundException()
