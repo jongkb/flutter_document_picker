@@ -254,7 +254,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     
     private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
-            return getInputStreamForVirtualFile(uri, "application/*")
+            return getInputStreamForVirtualFile(uri, "text/plain")
         }
         
         return context.contentResolver.openInputStream(uri)
