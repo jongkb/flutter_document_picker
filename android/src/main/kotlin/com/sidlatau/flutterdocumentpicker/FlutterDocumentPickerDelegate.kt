@@ -260,15 +260,6 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
             throw FileNotFoundException()
         }
     }
-    
-    /*private fun getInputStream(uri: Uri): InputStream? {
-        if (isVirtualFile(uri)) {
-            Log.d(FlutterDocumentPickerPlugin.TAG, "Is virtual file")
-            return getInputStreamForVirtualFile(uri, "*/*")
-        }
-        
-        return context.contentResolver.openInputStream(uri)
-    }*/
 }
 
 class FileCopyTaskLoaderResult {
