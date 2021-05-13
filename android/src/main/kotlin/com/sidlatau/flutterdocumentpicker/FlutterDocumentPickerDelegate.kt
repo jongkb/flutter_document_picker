@@ -187,7 +187,16 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
     }
 
     private fun copyToTemp(uri: Uri, fileName: String): String {
-        val path = context.cacheDir.path + File.separator + fileName
+        var input: InputStream? = null
+        val virtualFile = isVirtualFile(uri)
+        if (virtualFile) {
+            Log.d(FlutterDocumentPickerPlugin.TAG, "Is virtual file")
+            input = getInputStreamForVirtualFile(uri, "application/pdf")
+        } else {
+            input = context.contentResolver.openInputStream(uri)    
+        }
+        
+        val path = context.cacheDir.path + File.separator + fileName + (if (virtualFile) "" else ".pdf")
 
         val file = File(path)
 
@@ -195,7 +204,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
             file.delete()
         }
 
-        BufferedInputStream(getInputStream(uri))?.use { inputStream ->
+        BufferedInputStream(input)?.use { inputStream ->
             BufferedOutputStream(FileOutputStream(file)).use { outputStream ->
                 val buf = ByteArray(1024)
                 var len = inputStream.read(buf)
@@ -252,14 +261,14 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
         }
     }
     
-    private fun getInputStream(uri: Uri): InputStream? {
+    /*private fun getInputStream(uri: Uri): InputStream? {
         if (isVirtualFile(uri)) {
             Log.d(FlutterDocumentPickerPlugin.TAG, "Is virtual file")
             return getInputStreamForVirtualFile(uri, "*/*")
         }
         
         return context.contentResolver.openInputStream(uri)
-    }
+    }*/
 }
 
 class FileCopyTaskLoaderResult {
