@@ -196,7 +196,7 @@ class FileCopyTaskLoader(context: Context, private val uri: Uri, private val fil
             input = context.contentResolver.openInputStream(uri)    
         }
         
-        val path = context.cacheDir.path + File.separator + fileName + (if (virtualFile) "" else ".pdf")
+        val path = context.cacheDir.path + File.separator + fileName + (if (virtualFile) ".pdf" else "")
 
         val file = File(path)
 
